@@ -30,6 +30,19 @@ class UserController {
   }
   
   //Listar Amigos
+    public function listarAmigos() {
+      //Comprueba si el usuario esta registrado.
+      if(IDUSER) {      
+      $eval = "SELECT A2.id id_amigo, A2.nombre nombre_amigo, A2.email, A2.imgSrc FROM users A1 INNER JOIN amigos B ON A1.id = B.id_usuario INNER JOIN users A2 ON B.id_amigo = A2.id WHERE A1.id =" . IDUSER;
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute();
+      $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
+      exit(json_encode($resultado));
+    } else {
+      http_response_code(401);
+      exit(json_encode(["error" => "Fallo de autorizacion"]));       
+    }
+  }
 
   public function leerPerfil() {
     if(IDUSER) {
@@ -141,15 +154,28 @@ class UserController {
   
   public function addFriend() {
       $user = json_decode(file_get_contents("php://input"));
+      $id_amigo = $user->id;
       if(is_null(IDUSER)){
       http_response_code(401);
       exit(json_encode(["error" => "Fallo de autorizacion"]));
       }
+      $eval = "SELECT * amigos WHERE id_usuario=? AND id_amigo =?";
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute([IDUSER,$id_amigo]);
+      $resultado = $peticion->fetchObject();
+      if(!$resultado){
+       http_response_code(409);
+       exit(json_encode(["error" => "Ya eres amigo de ese usuario"]));
+      }
+      
       if(isset($user->id)){
           $id_amigo = $user->id;
           $eval = "INSERT INTO amigos (id_usuario,id_amigo) VALUES(?,?)";
           $peticion = $this->db->prepare($eval);
           $peticion->execute([IDUSER,$id_amigo]);
+          $eval = "INSERT INTO amigos (id_usuario,id_amigo) VALUES(?,?)";
+          $peticion = $this->db->prepare($eval);
+          $peticion->execute([$id_amigo,IDUSER]);
       } else {
       http_response_code(400);
       exit(json_encode(["error" => "No se han enviado todos los parametros"]));

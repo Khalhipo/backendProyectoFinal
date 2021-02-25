@@ -49,6 +49,9 @@ switch($control[0]) {
           case "list":
             $user->listarUser();
             break;
+          case "amigos":
+            $user->listarAmigos();
+            break;
           case "":
             $user->leerPerfil();
             break;
