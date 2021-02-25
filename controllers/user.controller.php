@@ -159,13 +159,16 @@ class UserController {
       http_response_code(401);
       exit(json_encode(["error" => "Fallo de autorizacion"]));
       }
-      $eval = "SELECT * amigos WHERE id_usuario=? AND id_amigo =?";
+      $eval = "SELECT * FROM amigos WHERE id_usuario=? AND id_amigo=?";
       $peticion = $this->db->prepare($eval);
       $peticion->execute([IDUSER,$id_amigo]);
       $resultado = $peticion->fetchObject();
-      if(!$resultado){
+      if($resultado){
        http_response_code(409);
        exit(json_encode(["error" => "Ya eres amigo de ese usuario"]));
+      } else if(IDUSER == $id_amigo){
+       http_response_code(409);
+       exit(json_encode(["error" => "No puedes añadirte a ti mismo a amigos"])); 
       }
       
       if(isset($user->id)){
