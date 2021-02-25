@@ -33,7 +33,7 @@ class UserController {
     public function listarAmigos() {
       //Comprueba si el usuario esta registrado.
       if(IDUSER) {      
-      $eval = "SELECT A2.id id_amigo, A2.nombre nombre_amigo, A2.email, A2.imgSrc FROM users A1 INNER JOIN amigos B ON A1.id = B.id_usuario INNER JOIN users A2 ON B.id_amigo = A2.id WHERE A1.id =" . IDUSER;
+      $eval = "SELECT A2.id, A2.nombre, A2.email, A2.imgSrc FROM users A1 INNER JOIN amigos B ON A1.id = B.id_usuario INNER JOIN users A2 ON B.id_amigo = A2.id WHERE A1.id =" . IDUSER;
       $peticion = $this->db->prepare($eval);
       $peticion->execute();
       $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
@@ -302,6 +302,24 @@ class UserController {
       $peticion->execute([IDUSER]);
       http_response_code(200);
       exit(json_encode("Usuario eliminado correctamente"));
+    } else {
+      http_response_code(401);
+      exit(json_encode(["error" => "Fallo de autorizacion"]));            
+    }
+  } 
+    public function eliminarAmigo() {
+    if(IDUSER) {
+      $id_amigo = null;
+      if(!empty($_GET["id"])) $id_amigo = $_GET["id"];
+      //Preparamos la peticion de eliminar usuario de la base de datos.
+      $eval = "DELETE FROM amigos WHERE id_usuario=? AND id_amigo=?";
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute([IDUSER,$id_amigo]);
+      $eval = "DELETE FROM amigos WHERE id_usuario=? AND id_amigo=?";
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute([$id_amigo,IDUSER]);
+      http_response_code(200);
+      exit(json_encode("Amigo eliminado correctamente"));
     } else {
       http_response_code(401);
       exit(json_encode(["error" => "Fallo de autorizacion"]));            

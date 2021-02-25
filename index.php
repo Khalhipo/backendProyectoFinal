@@ -76,8 +76,15 @@ switch($control[0]) {
         $user->editarUser();
         break;
       case "DELETE":
+        switch($control[1]) {
+          case "":
         $user->eliminarUser();
         break;
+          case "friend":
+        $user->eliminarAmigo();
+        }
+        break;
+
 
       default: exit(json_encode(["Bienvenido al Backend con routes"]));  
     }  
