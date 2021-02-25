@@ -11,9 +11,14 @@ class UserController {
   }
 
   public function listarUser() {
-    //Comprueba si el usuario esta registrado.
-    if(IDUSER) {
-      $eval = "SELECT id,nombre,email,sexo,peso,altura,imgSrc FROM users";
+      //Comprueba si el usuario esta registrado.
+      if(IDUSER) {      
+      $busqueda = null;
+      if(!empty($_GET["busqueda"])) $busqueda = $_GET["busqueda"];
+
+      $eval = "SELECT * FROM users WHERE";
+      $eval .= $busqueda ? " email LIKE '%".$busqueda."%'" : null;
+
       $peticion = $this->db->prepare($eval);
       $peticion->execute();
       $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
@@ -23,6 +28,8 @@ class UserController {
       exit(json_encode(["error" => "Fallo de autorizacion"]));       
     }
   }
+  
+  //Listar Amigos
 
   public function leerPerfil() {
     if(IDUSER) {
@@ -130,6 +137,23 @@ class UserController {
       http_response_code(400);
       exit(json_encode(["error" => "No se han enviado todos los parametros"]));
     }
+  }
+  
+  public function addFriend() {
+      $user = json_decode(file_get_contents("php://input"));
+      if(is_null(IDUSER)){
+      http_response_code(401);
+      exit(json_encode(["error" => "Fallo de autorizacion"]));
+      }
+      if(isset($user->id)){
+          $id_amigo = $user->id;
+          $eval = "INSERT INTO amigos (id_usuario,id_amigo) VALUES(?,?)";
+          $peticion = $this->db->prepare($eval);
+          $peticion->execute([IDUSER,$id_amigo]);
+      } else {
+      http_response_code(400);
+      exit(json_encode(["error" => "No se han enviado todos los parametros"]));
+    }  
   }
 
   public function registrarUser() {

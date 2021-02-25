@@ -62,6 +62,9 @@ switch($control[0]) {
           case "image":
             $user->subirAvatar();
             break;
+          case "friend":
+            $user->addFriend();
+            break;
           case "":
             $user->registrarUser();
         }
