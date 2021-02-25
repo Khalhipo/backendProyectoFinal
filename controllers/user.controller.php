@@ -13,7 +13,7 @@ class UserController {
   public function listarUser() {
     //Comprueba si el usuario esta registrado.
     if(IDUSER) {
-      $eval = "SELECT id,nombre,apellidos,email,telefono,imgSrc FROM users";
+      $eval = "SELECT id,nombre,email,sexo,peso,altura,imgSrc FROM users";
       $peticion = $this->db->prepare($eval);
       $peticion->execute();
       $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
@@ -26,7 +26,7 @@ class UserController {
 
   public function leerPerfil() {
     if(IDUSER) {
-      $eval = "SELECT nombre,apellidos,email,telefono,dni,imgSrc FROM users WHERE id=?";
+      $eval = "SELECT nombre,email,sexo,altura,peso,imgSrc FROM users WHERE id=?";
       $peticion = $this->db->prepare($eval);
       $peticion->execute([IDUSER]);
       $resultado = $peticion->fetchObject();
@@ -137,14 +137,15 @@ class UserController {
     $user = json_decode(file_get_contents("php://input"));
 
     //Comprobamos que los datos sean consistentes.
-    if(!isset($user->email) || !isset($user->password)|| !isset($user->dni)) {
+    if(!isset($user->email) || !isset($user->password)) {
       http_response_code(400);
       exit(json_encode(["error" => "No se han enviado todos los parametros"]));
 
     }
     if(!isset($user->nombre)) $user->nombre = null;
-    if(!isset($user->apellidos)) $user->apellidos = null;
-    if(!isset($user->telefono)) $user->telefono = null;
+    if(!isset($user->sexo)) $user->sexo = null;
+    if(!isset($user->peso)) $user->peso = null;
+    if(!isset($user->altura)) $user->altura = null;
 
     //Comprueba que no exista otro usuario con el mismo email.
     $peticion = $this->db->prepare("SELECT id FROM users WHERE email=?");
@@ -152,10 +153,10 @@ class UserController {
     $resultado = $peticion->fetchObject();
     if(!$resultado) {
       $password = password_hash($user->password, PASSWORD_BCRYPT);
-      $eval = "INSERT INTO users (nombre,apellidos,password,email,telefono,dni) VALUES (?,?,?,?,?,?)";
+      $eval = "INSERT INTO users (nombre,password,email,sexo,peso,altura) VALUES (?,?,?,?,?,?)";
       $peticion = $this->db->prepare($eval);
       $peticion->execute([
-        $user->nombre,$user->apellidos,$password,$user->email,$user->telefono,$user->dni
+        $user->nombre,$password,$user->email,$user->sexo,$user->peso,$user->altura
       ]);
       
       //Preparamos el token.
@@ -200,15 +201,17 @@ class UserController {
       }
 
       //Obtenemos los datos guardados en el servidor relacionados con el usuario
-      $peticion = $this->db->prepare("SELECT nombre,apellidos,email,telefono FROM users WHERE id=?");
+      $peticion = $this->db->prepare("SELECT nombre,email,sexo, peso, altura FROM users WHERE id=?");
       $peticion->execute([IDUSER]);
       $resultado = $peticion->fetchObject();
 
       //Combinamos los datos de la petición y de los que había en la base de datos.
       $nNombre = isset($user->nombre) ? $user->nombre : $resultado->nombre;
-      $nApellidos = isset($user->apellidos) ? $user->apellidos : $resultado->apellidos;
-      $nTelefono = isset($user->telefono) ? $user->telefono : $resultado->telefono;
       $nEmail = isset($user->email) ? $user->email : $resultado->email;
+      $nSexo = isset($user->sexo) ? $user->sexo : $resultado->sexo;
+      $nPeso = isset($user->peso) ? $user->peso : $resultado->peso;
+      $nAltura = isset($user->altura) ? $user->altura : $resultado->altura;
+      
 
       //Si hemos recibido el dato de modificar la password.
       if(isset($user->password) && (strlen($user->password))){
@@ -216,13 +219,13 @@ class UserController {
         //Encriptamos la contraseña.
         $nPassword = password_hash($user->password, PASSWORD_BCRYPT);
         //Preparamos la petición.
-        $eval = "UPDATE users SET nombre=?,apellidos=?,password=?,email=?,telefono=? WHERE id=?";
+        $eval = "UPDATE users SET nombre=?,sexo=?,password=?,email=?,peso=?,altura=? WHERE id=?";
         $peticion = $this->db->prepare($eval);
-        $peticion->execute([$nNombre,$nApellidos,$nPassword,$nEmail,$nTelefono,IDUSER]);
+        $peticion->execute([$nNombre,$nSexo,$nPassword,$nEmail,$nPeso,$nAltura,IDUSER]);
       } else {
-        $eval = "UPDATE users SET nombre=?,apellidos=?,email=?,telefono=? WHERE id=?";
+        $eval = "UPDATE users SET nombre=?,sexo=?,email=?,peso=?,altura=? WHERE id=?";
         $peticion = $this->db->prepare($eval);
-        $peticion->execute([$nNombre,$nApellidos,$nEmail,$nTelefono,IDUSER]);        
+        $peticion->execute([$nNombre,$nSexo,$nEmail,$nPeso,$nAltura,IDUSER]);        
       }
       http_response_code(201);
       exit(json_encode("Usuario actualizado correctamente"));

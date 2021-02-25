@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `back`
+-- Base de datos: `backproyecto`
 --
 
 -- --------------------------------------------------------
@@ -58,12 +58,11 @@ CREATE TABLE `notas` (
 CREATE TABLE `users` (
   `id` int(11) UNSIGNED NOT NULL,
   `nombre` varchar(32) DEFAULT NULL,
-  `apellidos` varchar(64) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `email` varchar(40) NOT NULL,
-  `telefono` int(10) UNSIGNED DEFAULT NULL,
-  `dni` varchar(16) NOT NULL,
-  `imgSrc` varchar(128) DEFAULT NULL
+  `sexo` varchar(40) DEFAULT NULL,
+  `altura` int(10) UNSIGNED DEFAULT NULL,
+  `peso` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
