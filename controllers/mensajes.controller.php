@@ -43,6 +43,22 @@ class MensajesController {
       exit(json_encode(["error" => "Fallo de autorizacion"])); 
     }
   }
+  
+    public function leerMensajes() {
+    if(IDUSER){
+      $id_amigo = null;
+      if(!empty($_GET["id"])) $id_amigo = $_GET["id"];
+      //Seleccionamos todos los mensajes enviados sustituyendo el ID del destinatario por su nombre.
+      $eval = "SELECT * FROM mensajes WHERE (idRemitente =? AND idDestinatario =?) OR (idRemitente =? AND idDestinatario =?)";
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute([IDUSER,$id_amigo,$id_amigo,IDUSER]);
+      $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
+      exit(json_encode($resultado));
+    } else {
+      http_response_code(401);
+      exit(json_encode(["error" => "Fallo de autorizacion"])); 
+    }
+  }
 
   public function enviarMensaje() {
     if(IDUSER){
@@ -104,6 +120,23 @@ class MensajesController {
     } else {
       http_response_code(401);
       exit(json_encode(["error" => "Fallo de autorizacion"]));            
+    }
+  }
+  
+  public function borrarChat() {
+      if(IDUSER){
+      $id_amigo = null;
+      if(!empty($_GET["id"])) $id_amigo = $_GET["id"];
+      //Seleccionamos todos los mensajes enviados sustituyendo el ID del destinatario por su nombre.
+      $eval = "DELETE FROM mensajes WHERE (idRemitente =? AND idDestinatario =?) OR (idRemitente =? AND idDestinatario =?)";
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute([IDUSER,$id_amigo,$id_amigo,IDUSER]);
+      http_response_code(200);
+      if($peticion->rowCount()) exit(json_encode("Chat eliminado correctamente"));
+      else exit(json_encode("No se ha eliminado el chat"));
+    } else {
+      http_response_code(401);
+      exit(json_encode(["error" => "Fallo de autorizacion"])); 
     }
   }
 }

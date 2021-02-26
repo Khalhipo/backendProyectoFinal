@@ -85,7 +85,6 @@ switch($control[0]) {
         }
         break;
 
-
       default: exit(json_encode(["Bienvenido al Backend con routes"]));  
     }  
     break;
@@ -115,7 +114,9 @@ switch($control[0]) {
       $mensajes = new MensajesController($conexion);
       switch(METODO){
         case "GET":
-          if(isset($control[1]) && $control[1] == "sent")
+          if(isset($control[1]) && $control[1] == "list")
+              $mensajes->leerMensajes();
+          else if(isset($control[1]) && $control[1] == "sent")
             $mensajes->leerEnviados();
           else
             $mensajes->leerRecibidos();
@@ -127,7 +128,12 @@ switch($control[0]) {
           $mensajes->editarMensaje();
           break;
         case "DELETE":
-          $mensajes->eliminarMensaje($control[1]);
+          switch($control[1]){
+            case "chat":
+            $mensajes->borrarChat();
+              break;
+            }
+
           break;
         default: exit(json_encode(["Bienvenido al Backend con routes"]));
       }
