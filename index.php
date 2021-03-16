@@ -57,6 +57,7 @@ switch($control[0]) {
             break;
         }
         break;
+    
       case "POST":
         switch($control[1]) {
           case "login":
@@ -104,6 +105,73 @@ switch($control[0]) {
         break;
       case "DELETE":
         $notas->eliminarNota($control[1]);
+        break;
+      default: exit(json_encode(["Bienvenido al Backend con routes"]));
+    }
+    break;
+
+    case "entrenamientos":
+    require_once("controllers/entrenamientos.controller.php");
+    $entrenamientos = new EntrenamientosController($conexion);
+    switch(METODO) {
+      case "GET":
+        switch($control[1]) {
+          case "listEj":
+            $entrenamientos->listarEjercicios();
+            break;
+          case "etto":
+            $entrenamientos->recuperarEtto();
+        }
+        break;
+      case "POST":
+          switch($control[1]) {
+          case "ejer":
+            $entrenamientos->crearEjercicio();
+            break;
+          case "":
+            $entrenamientos->crearEtto();
+        }
+        break;
+      case "PUT":
+          $entrenamientos->editarEtto();
+        break;
+      case "DELETE":
+          $entrenamientos->borrarEtto();
+        break;
+      default: exit(json_encode(["Bienvenido al Backend con routes"]));
+    }
+    break;
+
+    case "stats":
+    require_once("controllers/stats.controller.php");
+    $stats = new StatsController($conexion);
+    switch(METODO) {
+      case "GET":
+        switch($control[1]) {
+          case "pesoCorporal":
+              $stats->obtenerPesoCorporal();
+            break;
+          case "volumen":
+              $stats->obtenerVolumen();
+            break;
+          case "intensidad":
+              $stats->obtenerIntensidad();
+        }
+        break;
+      case "POST":
+          switch($control[1]) {
+          case "ejer":
+
+            break;
+          case "":
+
+        }
+        break;
+      case "PUT":
+
+        break;
+      case "DELETE":
+
         break;
       default: exit(json_encode(["Bienvenido al Backend con routes"]));
     }
