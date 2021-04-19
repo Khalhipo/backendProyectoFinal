@@ -23,6 +23,10 @@ class EntrenamientosController {
             http_response_code(400);
             exit(json_encode(["error" => "No se han enviado todos los parametros"]));
         }
+        
+        if(!isset($etto->comentario)){
+            $etto->comentario = '';
+        }
 
         $eval = "INSERT INTO entrenamientos (id_usuario,fecha,comentario) VALUES (?,?,?)";
         $peticion = $this->db->prepare($eval);
@@ -36,11 +40,13 @@ class EntrenamientosController {
             $resultado = $peticion->execute([$ultimo_id_etto, $ejercicio->id_ejercicio, $ejercicio->series, $ejercicio->repeticiones,
                 $ejercicio->peso]);
         }
-
+        
+        if(isset($etto->pesoCorporal)){
         $eval = "INSERT INTO pesos (id_usuario,fecha,peso) VALUES (?,?,?)";
         $peticion = $this->db->prepare($eval);
         $resultado = $peticion->execute([IDUSER, $etto->fecha, $etto->pesoCorporal]);
-
+        }
+        
         http_response_code(201);
         exit(json_encode("Entrenamiento creado correctamente"));
     }
@@ -67,8 +73,13 @@ class EntrenamientosController {
             $eval = "SELECT peso FROM pesos WHERE id_usuario = ? AND fecha = ?";
             $peticion = $this->db->prepare($eval);
             $peticion->execute([IDUSER, $fecha]);
-            $etto['pesoCorporal'] = $peticion->fetchAll()[0]['peso'];
-
+            
+            if($peticion->rowCount()==1){
+                $etto['pesoCorporal'] = $peticion->fetchAll()[0]['peso'];
+            } else {
+                $etto['pesoCorporal'] = '';
+            }
+            
             $eval = "SELECT * FROM ejerciciosmostrar WHERE id_entrenamiento = ?";
             $peticion = $this->db->prepare($eval);
             $peticion->execute([$etto['id']]);
@@ -137,10 +148,21 @@ class EntrenamientosController {
             $resultado = $peticion->execute([$etto->id, $ejercicio->id_ejercicio, $ejercicio->series, $ejercicio->repeticiones,
                 $ejercicio->peso]);
         }
-
-        $eval = "UPDATE pesos SET peso = ? WHERE id_usuario = ? AND fecha = ?";
+        
+        
+        $eval = "SELECT peso FROM pesos WHERE id_usuario = ? AND fecha = ?";
         $peticion = $this->db->prepare($eval);
-        $resultado = $peticion->execute([$etto->pesoCorporal,IDUSER, $etto->fecha]);
+        $peticion->execute([IDUSER, $etto->fecha]);
+            
+        if($peticion->rowCount()==1){
+            $eval = "UPDATE pesos SET peso = ? WHERE id_usuario = ? AND fecha = ?";
+            $peticion = $this->db->prepare($eval);
+            $resultado = $peticion->execute([$etto->pesoCorporal,IDUSER, $etto->fecha]);
+        } else {
+            $eval = "INSERT INTO pesos (peso, id_usuario, fecha) VALUES (?,?,?)";
+            $peticion = $this->db->prepare($eval);
+            $resultado = $peticion->execute([$etto->pesoCorporal,IDUSER, $etto->fecha]);
+            }
 
         http_response_code(201);
         exit(json_encode("Entrenamiento actualizado correctamente"));

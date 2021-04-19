@@ -1,7 +1,7 @@
 <?php
 class db{
   private $host = "localhost";
-  private $database = "backproyecto";
+  private $database = "baseBueno";
   private $user = "root";
   private $password = "";
   private $dbPDO;

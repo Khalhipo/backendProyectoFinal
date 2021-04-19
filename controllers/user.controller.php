@@ -33,10 +33,13 @@ class UserController {
     public function listarAmigos() {
       //Comprueba si el usuario esta registrado.
       if(IDUSER) {      
-      $eval = "SELECT A2.id, A2.nombre, A2.email, A2.imgSrc FROM users A1 INNER JOIN amigos B ON A1.id = B.id_usuario INNER JOIN users A2 ON B.id_amigo = A2.id WHERE A1.id =" . IDUSER;
+      //$eval = "SELECT A2.id, A2.nombre, A2.email, A2.imgSrc FROM users A1 INNER JOIN amigos B ON A1.id = B.id_usuario INNER JOIN users A2 ON B.id_amigo = A2.id WHERE A1.id =" . IDUSER;
+      $eval = "SELECT A2.id, A2.nombre, A2.email, A2.imgSrc,(SELECT COUNT(*) FROM mensajes WHERE (idDestinatario =". IDUSER . " AND idRemitente = A2.id) 
+      AND leido = 0) AS numMensajes FROM users A1 INNER JOIN amigos B ON A1.id = B.id_usuario INNER JOIN users A2 ON B.id_amigo = A2.id WHERE A1.id =" . IDUSER;
       $peticion = $this->db->prepare($eval);
       $peticion->execute();
       $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
+      
       exit(json_encode($resultado));
     } else {
       http_response_code(401);

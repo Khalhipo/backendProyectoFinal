@@ -53,6 +53,14 @@ class MensajesController {
       $peticion = $this->db->prepare($eval);
       $peticion->execute([IDUSER,$id_amigo,$id_amigo,IDUSER]);
       $resultado = $peticion->fetchAll(PDO::FETCH_OBJ);
+      
+      //Marcar mensaje como leido una vez enviados los mensajes al usuario.
+      foreach($resultado as $amigo){
+      $eval = "UPDATE mensajes SET leido=1 WHERE idDestinatario=? AND idRemitente=? AND leido=0";
+      $peticion = $this->db->prepare($eval);
+      $peticion->execute([IDUSER,$amigo->idRemitente]);
+      }
+      
       exit(json_encode($resultado));
     } else {
       http_response_code(401);
